@@ -22,7 +22,8 @@ library(tidyverse)
 
 
 ```{r}
-orders <- read_csv("data/Orders.csv")
+orders <- read_csv("data/Orders.csv", col_types = cols(Order.Date = col_date(format = "%m/%d/%y"), 
+    Ship.Date = col_date(format = "%m/%d/%y")))
 returns <- read_csv("data/Returns.csv")
 ```
 
@@ -32,9 +33,21 @@ orders$Profit <- as.numeric(gsub('[$,]', '', orders$Profit))
 orders$Sales <- as.numeric(gsub('[$,]', '', orders$Sales))
 ```
 
-
+### Problem 2: Inventory Management
+- Retailers that depend on seasonal shoppers have a particularly challenging job when it comes to inventory management. Your manager is making plans for next year's inventory.
+- He wants you to answer the following questions:
+    1. Is there any seasonal trend of inventory in the company?
+    2. Is the seasonal trend the same for different categories?
 
 ```{r}
+
+orders %>%
+  group_by(Order.Date)%>%
+  summarise(inventory = sum(Quantity))%>%
+  ggplot(aes(Order.Date,inventory))+
+  geom_line()+
+  geom_smooth()+
+  labs(title = "Total Orders", x = "Date","Total Items Ordered")
 
 ```
 
