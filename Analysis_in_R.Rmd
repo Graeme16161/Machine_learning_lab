@@ -90,8 +90,88 @@ combine %>%
        y = "Number of Customers")
 
 #3
+#PERPORTION of orders returned by region
+returns_region <- returns %>%
+  group_by(Region)%>%
+  summarise(total_returns = n())
+  
+orders_region <- orders %>%
+  select(Order.ID, Region) %>%
+  distinct()%>%
+  group_by(Region)%>%
+  summarise(total_orders = n())
+
+g <- inner_join(returns_region, orders_region, by = "Region") %>%
+  mutate(per_return = total_returns/total_orders*100)%>%
+  ggplot(aes(reorder(Region,per_return), per_return))+
+  geom_bar(stat = "identity")+
+  coord_flip()+
+  labs(title = "Regions by Percentage of Orders Returned",
+       x = "Region",
+       y = "Percentage of Orders Returned")
 
 
+#4  
+returns_region <- returns %>%
+  group_by(Region)%>%
+  summarise(total_returns = n())
+  
+orders_region <- orders %>%
+  select(Order.ID, Region) %>%
+  distinct()%>%
+  group_by(Region)%>%
+  summarise(total_orders = n())
+
+g <- inner_join(returns_region, orders_region, by = "Region") %>%
+  mutate(per_return = total_returns/total_orders*100)%>%
+  ggplot(aes(reorder(Region,per_return), per_return))+
+  geom_bar(stat = "identity")+
+  coord_flip()+
+  labs(title = "Regions by Percentage of Orders Returned",
+       x = "Region",
+       y = "Percentage of Orders Returned")
+```
+
+
+
+#### Step 2:
+- Your manager believes that **how long it took the order to ship** would affect whether the customer would return it or not. 
+- He wants you to generate a feature which can measure how long it takes the company to process each order.
+- ***Hint:*** Process.Time = Ship.Date - Order.Date
+
+```{r}
+ml_data <- left_join(orders, returns, by = c("Order.ID" = "Order ID"))
+  
+ml_data$Returned[is.na(ml_data$Returned)] <- "No"
+
+ml_data <- ml_data %>%
+  mutate(Process.Time = Ship.Date - Order.Date)
   
 ```
 
+
+#### Step 3:
+
+- If a product has been returned before, it may be returned again. 
+- Let us generate a feature indictes how many times the product has been returned before.
+- If it never got returned, we just impute using 0.
+- ***Hint:*** Group by different Product.ID
+```{r}
+ml_data <- ml_data %>%
+  mutate(new = if_else(Returned == "Yes",1,0))%>%
+  group_by(Product.ID)%>%
+  mutate(n_times_returned = sum(new))%>%
+  ungroup()%>%
+  select(-new)
+  
+```
+
+### Problem 5: Fitting Models
+
+- You can use any binary classification method you have learned so far.
+- Use 80/20 training and test splits to build your model. 
+- Double check the column types before you fit the model.
+- Only include useful features. i.e all the `ID`s should be excluded from your training set.
+- Note that there are only less than 5% of the orders have been returned, so you should consider using the [createDataPartition](https://www.rdocumentation.org/packages/caret/versions/6.0-80/topics/createDataPartition) function from `caret` package and [StratifiedKfold](http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html#sklearn-model-selection-stratifiedkfold) from sklearn when running cross-validation.
+- Do forget to `set.seed()` before the spilt to make your result reproducible.
+- **Note:** We are not looking for the best tuned model in the lab so don't spend too much time on grid search. Focus on model evaluation and the business use case of each model.
