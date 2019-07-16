@@ -49,5 +49,49 @@ orders %>%
   geom_smooth()+
   labs(title = "Total Orders", x = "Date","Total Items Ordered")
 
+orders %>%
+  group_by(Order.Date, Category)%>%
+  summarise(inventory = sum(Quantity))%>%
+  ggplot(aes(Order.Date,inventory))+
+  geom_line()+
+  geom_smooth()+
+  facet_grid(Category~.)+
+  labs(title = "Total Orders", x = "Date","Total Items Ordered")
+
+```
+
+- Your manager required you to give a brief report (**Plots + Interpretations**) on returned orders.
+
+	1. How much profit did we lose due to returns each year?
+	2. How many customer returned more than once? more than 5 times?
+	3. Which regions are more likely to return orders?
+	4. Which categories 
+```{r}
+#1
+combine <- inner_join(returns,orders, by = c("Order ID" = "Order.ID"))
+
+profit_loss <- sum(combine$Profit)
+
+print(paste("Total lost profit on returned orders in dollars:", profit_loss))
+
+#2
+combine %>%
+  select('Order ID','Customer.Name')%>%
+  distinct()%>%
+  group_by(Customer.Name)%>%
+  summarise(total_returns = n())%>%
+  group_by(total_returns) %>%
+  summarise(number_customers = n())%>%
+  ggplot(aes(total_returns,number_customers))+
+    geom_bar(stat = 'identity')+
+  geom_text(aes(label=number_customers),  size=3.5, nudge_y = 10)+
+  labs(title = "Number of Customers by Number of Returns",
+       x = "Total orders returned",
+       y = "Number of Customers")
+
+#3
+
+
+  
 ```
 
