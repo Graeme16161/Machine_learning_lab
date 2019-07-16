@@ -184,8 +184,32 @@ ml_data <- ml_data %>%
 
 
 #note that 'new' feature is just returned mapped to 1
-first_model = glm(new ~ Process.Time + n_times_returned + Region.x + Category,
+first_model = glm(new ~ Process.Time + n_times_returned + Region.x + Category + Shipping.Cost + Discount + Order.Priority + Ship.Mode,
                     family = "binomial",
                     data = ml_data)
+
+summary(first_model)
 ```
 
+#Model with only significant features
+```{r}
+second_model = glm(new ~ n_times_returned + Category + Discount + Order.Priority,
+                    family = "binomial",
+                    data = ml_data)
+
+summary(second_model)
+```
+
+
+```{r}
+table(ml_data$new,round(second_model$fitted.values))
+```
+
+
+
+### Problem 7: Feature Engineering Revisit
+- Is there anything wrong with the new feature we generated? How should we fix it?
+- ***Hint***: For the real test set, we do not know it will get returned or not.
+
+
+The issue is that we created the feature by adding the number of times that the item has been returned together. We cannot do this with test data as it is missing. I suppose the solution is to just do the calculation on the training data only. 
