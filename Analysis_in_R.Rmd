@@ -161,8 +161,7 @@ ml_data <- ml_data %>%
   mutate(new = if_else(Returned == "Yes",1,0))%>%
   group_by(Product.ID)%>%
   mutate(n_times_returned = sum(new))%>%
-  ungroup()%>%
-  select(-new)
+  ungroup()
   
 ```
 
@@ -175,3 +174,18 @@ ml_data <- ml_data %>%
 - Note that there are only less than 5% of the orders have been returned, so you should consider using the [createDataPartition](https://www.rdocumentation.org/packages/caret/versions/6.0-80/topics/createDataPartition) function from `caret` package and [StratifiedKfold](http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html#sklearn-model-selection-stratifiedkfold) from sklearn when running cross-validation.
 - Do forget to `set.seed()` before the spilt to make your result reproducible.
 - **Note:** We are not looking for the best tuned model in the lab so don't spend too much time on grid search. Focus on model evaluation and the business use case of each model.
+
+
+```{r}
+#ml_data$Category <- as.factor(ml_data$Category)
+#ml_data$ <- as.factor(ml_data$Category)
+#ml_data$Category <- as.factor(ml_data$Category)
+#ml_data$Category <- as.factor(ml_data$Category)
+
+
+#note that 'new' feature is just returned mapped to 1
+first_model = glm(new ~ Process.Time + n_times_returned + Region.x + Category,
+                    family = "binomial",
+                    data = ml_data)
+```
+
